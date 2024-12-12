@@ -18,12 +18,21 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(
+  name = "roles",
+  indexes = {
+    @Index(name = "role_primary_key", columnList = "id", unique = true)
+  },
+  uniqueConstraints = {
+    @UniqueConstraint(name = "role_name_uniqueness", columnNames = "name")
+  }
+)
 public class Role {
 
     @Id
     @GeneratedValue
     private Integer id;
-    @Column(unique = true)
+
     private String name;
 
     @ManyToMany(mappedBy = "roles")
@@ -33,6 +42,7 @@ public class Role {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
+
     @LastModifiedDate
     @Column(insertable = false)
     private LocalDateTime lastModifiedDate;

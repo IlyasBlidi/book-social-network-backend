@@ -2,7 +2,6 @@ package com.razer.book.network.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +11,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(
+  name = "tokens",
+  indexes = {
+    @Index(name = "token_primary_key", columnList = "id", unique = true)
+  }
+)
 public class Token {
 
     @Id
@@ -23,6 +28,10 @@ public class Token {
     private LocalDateTime validatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(
+      name = "userId",
+      nullable = false,
+      foreignKey = @ForeignKey(name = "fk_user_id")
+    )
     private User user;
 }

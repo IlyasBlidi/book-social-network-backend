@@ -23,75 +23,95 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "_user")
 @EntityListeners(AuditingEntityListener.class)
+@Table(
+  name = "users",
+  uniqueConstraints = {
+    @UniqueConstraint(name = "user_email_uniqueness", columnNames = "email")
+  },
+  indexes = {
+    @Index(name = "user_primary_key", columnList = "id", unique = true)
+  }
+)
 public class User implements UserDetails, Principal {
-    @Id
-    @GeneratedValue
-    private Integer id;
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    @Column(unique = true)
-    private String email;
-    private String password;
-    private boolean accountLocked;
-    private boolean enabled;
+  @Id
+  @GeneratedValue
+  private Integer id;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<Role> roles;
+  private String firstName;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-    @LastModifiedDate
-    @Column(insertable = false)
-    private LocalDateTime lastModifiedDate;
+  private String lastName;
 
-    @Override
-    public String getName() {
-        return email;
-    }
+  private LocalDate dateOfBirth;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles
-                .stream()
-                .map(r -> new SimpleGrantedAuthority(r.getName()))
-                .collect(Collectors.toList());
-    }
+  private String email;
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
+  private String password;
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
+  private boolean accountLocked;
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  private boolean enabled;
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return !accountLocked;
-    }
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+    name = "user_roles",
+    joinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_user_id")),
+    inverseJoinColumns = @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role_id"))
+  )
+  private List<Role> roles;
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdDate;
 
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
+  @LastModifiedDate
+  @Column(insertable = false)
+  private LocalDateTime lastModifiedDate;
 
-    public String fullName() {
-        return firstName + " " + lastName;
-    }
+  @Override
+  public String getName() {
+    return email;
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return this.roles
+      .stream()
+      .map(r -> new SimpleGrantedAuthority(r.getName()))
+      .collect(Collectors.toList());
+  }
+
+  @Override
+  public String getPassword() {
+    return password;
+  }
+
+  @Override
+  public String getUsername() {
+    return email;
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return !accountLocked;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public String fullName() {
+    return firstName + " " + lastName;
+  }
 }
